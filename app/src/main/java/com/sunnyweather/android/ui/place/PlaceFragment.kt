@@ -1,5 +1,6 @@
 package com.sunnyweather.android.ui.place
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.R
+import com.sunnyweather.android.ui.weather.WeatherActivity
 
 class PlaceFragment : Fragment() {
 
@@ -34,10 +36,25 @@ class PlaceFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        if(viewModel.isPlaceSaved()) {
+            val place = viewModel.getSavedPlace()
+            val intent = Intent(context, WeatherActivity::class.java)
+            intent.apply {
+                putExtra("location_lng", place.location.lng)
+                putExtra("location_lat", place.location.lat)
+                putExtra("place_name", place.name)
+            }
+            startActivity(intent)
+            activity?.finish()
+            return
+        }
         val thisActivity = requireActivity()
         val recyclerView = thisActivity.findViewById<RecyclerView>(R.id.recyclerView)
         val searchPlaceEdit = thisActivity.findViewById<EditText>(R.id.searchPlaceEdit)
         val bgImageView = thisActivity.findViewById<ImageView>(R.id.bgImageView)
+        if(viewModel.searchPlaceBuffer.isNotEmpty()) {
+            searchPlaceEdit.setText(viewModel.searchPlaceBuffer)
+        }
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
         adapter = PlaceAdapter(this, viewModel.placeList)
@@ -47,6 +64,7 @@ class PlaceFragment : Fragment() {
             val content = searchPlaceEdit.text.toString()
             if(content.isNotEmpty()) {
                 viewModel.searchPlaces(content)
+                viewModel.searchPlaceBuffer = content
             }
             else {
                 recyclerView.visibility = View.GONE

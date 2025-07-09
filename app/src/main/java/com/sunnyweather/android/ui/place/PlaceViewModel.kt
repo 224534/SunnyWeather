@@ -12,6 +12,8 @@ class PlaceViewModel: ViewModel() {
 
     val placeList = ArrayList<Place>()
 
+    var searchPlaceBuffer = ""
+
     val placeLiveData = searchLiveData.switchMap { query ->
         Repository.searchPlaces(query)
     }
@@ -20,4 +22,9 @@ class PlaceViewModel: ViewModel() {
         searchLiveData.value = query
     }
 
+    fun savePlace(place: Place) = Repository.savePlace(place)
+
+    fun getSavedPlace() = Repository.getSavedPlace()
+
+    fun isPlaceSaved() = Repository.isPlaceSaved()
 }
